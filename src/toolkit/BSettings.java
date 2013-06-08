@@ -12,7 +12,7 @@ import java.io.IOException;
 public class BSettings {
 
     public static boolean STATE_HomeScreen_isAnimating;
-    private static Font fontSaxMono;
+    private static Font fontSaxMono, fontAerial;
 
     static {
         //init fonts
@@ -20,7 +20,9 @@ public class BSettings {
             GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
             //saxmono
             fontSaxMono = Font.createFont(Font.TRUETYPE_FONT, BSettings.class.getResourceAsStream("/resources/fonts/saxmono.ttf"));
+            fontAerial = Font.createFont(Font.TRUETYPE_FONT, BSettings.class.getResourceAsStream("/resources/fonts/aerial.ttf"));
             ge.registerFont(fontSaxMono);
+            ge.registerFont(fontAerial);
             //helvatica
         } catch (FontFormatException | IOException ex) {
             System.out.println(ex);
@@ -48,6 +50,10 @@ public class BSettings {
             case "text":
                 fontSize = (size == 0) ? 14f : (float) size;
                 font = fontSaxMono.deriveFont(fontSize);
+                break;
+            case "BSwitch":
+                fontSize = (size == 0) ? 16f : (float) size;
+                font = fontAerial.deriveFont(fontSize);
                 break;
         }
         return font;
