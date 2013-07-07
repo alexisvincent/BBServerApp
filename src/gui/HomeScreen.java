@@ -15,6 +15,7 @@ import java.awt.Insets;
 import java.awt.Point;
 import java.awt.RenderingHints;
 import javax.swing.JComponent;
+import listeners.BStateListener;
 import toolkit.BSettings;
 import toolkit.BToolkit;
 
@@ -36,19 +37,21 @@ public class HomeScreen extends BPanel {
         homeScreenPanel = new HomeScreenPanel();
         footer = new BFooter();
         logoPane = new JComponent() {
-                Image logo = BToolkit.getImage("logo");
-                Point pt = new Point(270, 20);
+            Image logo = BToolkit.getImage("logo");
+            double logoEnlargement = 1.5;
+            Point pt = new Point(200 - (int) (logo.getWidth(null) * logoEnlargement) / 2, 200 - (int) (logo.getHeight(null) * logoEnlargement) / 2);
 
-                @Override
-                public void paint(Graphics g) {
-                    Graphics2D g2d = (Graphics2D) g;
-                    g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-                    g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                    g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
-                    g2d.setRenderingHint(RenderingHints.KEY_COLOR_RENDERING, RenderingHints.VALUE_COLOR_RENDER_QUALITY);
-                    g2d.drawImage(logo, pt.x, pt.y, (int) (logo.getWidth(this) / 1.5), (int) (logo.getHeight(this) / 1.5), this);
-                }
-            };
+            @Override
+            public void paint(Graphics g) {
+                Graphics2D g2d = (Graphics2D) g;
+                g2d.setComposite(BToolkit.makeComposite(50));
+                g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+                g2d.setRenderingHint(RenderingHints.KEY_COLOR_RENDERING, RenderingHints.VALUE_COLOR_RENDER_QUALITY);
+                g2d.drawImage(logo, pt.x, pt.y, (int) (logo.getWidth(null) * logoEnlargement), (int) (logo.getHeight(null) * logoEnlargement), this);
+            }
+        };
         //set ResultScreen properties
         //add components to ResultScreen
         GridBagConstraints gc = new GridBagConstraints();
@@ -71,7 +74,7 @@ public class HomeScreen extends BPanel {
         gc.gridy = 2;
         gc.weighty = 0;
         this.add(footer, gc);
-        
+
         gc.gridx = 0;
         gc.gridy = 0;
         gc.gridwidth = 1;
@@ -105,6 +108,18 @@ public class HomeScreen extends BPanel {
             serverSwitch.setFont(BSettings.getFont("BSwitch", 12));
             serverSwitch.setPreferredSize(new Dimension(100, 50));
 
+            serverSwitch.addStateListener(new BStateListener() {
+
+                @Override
+                public void stateChanged(boolean state) {
+                    if (state) {
+                        main.Main.getSocketEngine().start();
+                    } else {
+                        main.Main.getSocketEngine().stop();
+                    }
+                }
+            });
+
             //begin adding le variabili
             this.setLayout(new GridBagLayout());
             gc = new GridBagConstraints();
@@ -120,7 +135,7 @@ public class HomeScreen extends BPanel {
             gc.fill = GridBagConstraints.NONE;
             gc.anchor = GridBagConstraints.CENTER;
             this.add(serverSwitch, gc);
-            
+
         }
 
         public void animate(String action) {

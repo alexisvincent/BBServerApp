@@ -16,12 +16,13 @@ public class MainFrame extends JFrame {
     
     private GridBagConstraints gc;
     private static HomeScreen homeScreen;
+    
+    static {
+        homeScreen = new HomeScreen();
+    }
 
     public MainFrame() {
 
-        //new instances
-        homeScreen = new HomeScreen();
-        
         //configure this damn FRAME O.o
         this.setResizable(false);
         this.setUndecorated(true);
