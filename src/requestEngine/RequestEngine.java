@@ -27,9 +27,6 @@ public class RequestEngine {
         Responce responce;
         Element responceElement = new Element("Responce");
 
-        responceElement.setAttribute("ResponceCode", "400");
-        responceElement.setAttribute("ResponceDiscription", "Failed");
-
         if (request.getRequestType().equals("Login") && request.getFrom().equals("RegistrationApp")) {
 
             responceElement = new Element("Responce");
@@ -43,7 +40,20 @@ public class RequestEngine {
                 responceElement.setAttribute("ResponceDiscription", "Bad Password");
             }
 
-        } else if (request.getRequestType().equals("ExampleRequestType")) {
+        } else if (request.getRequestType().equals("VotersKey") && request.getFrom().equals("RegistrationApp")) {
+            
+            String votersKey = sqlEngine.getVotersKey(request);
+            
+            responceElement = new Element("Responce");
+            responceElement.setAttribute("VotersKey", votersKey);
+            
+            if (votersKey.equals("")) {
+                responceElement.setAttribute("ResponceCode", "400");
+                responceElement.setAttribute("ResponceDiscription", "No such details");
+            } else {
+                responceElement.setAttribute("ResponceCode", "200");
+                responceElement.setAttribute("ResponceDiscription", "OK");
+            }
             
         }
 
