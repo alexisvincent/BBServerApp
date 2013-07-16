@@ -5,6 +5,7 @@ import components.BMenuBar;
 import gui.MainFrame;
 import gui.SplashScreen;
 import javax.swing.JFrame;
+import requestEngine.RequestEngine;
 import socketEngine.SimpleSocketEngine;
 import sqlEngine.SQLEngine;
 
@@ -16,8 +17,11 @@ public class Main {
 
     private static MainFrame mainFrame;
     private static SplashScreen splash;
+    
     private static SimpleSocketEngine socketEngine;
     private static SQLEngine sqlEngine;
+    private static RequestEngine requestEngine;
+    
     private static Main INSTANCE;
 
     static {
@@ -31,6 +35,7 @@ public class Main {
         
         socketEngine = new SimpleSocketEngine(12345);
         sqlEngine = new SQLEngine();
+        requestEngine = new RequestEngine(sqlEngine);
 
         //init mainFrame
         mainFrame = new MainFrame();
@@ -67,5 +72,9 @@ public class Main {
     public static SQLEngine getSqlEngine() {
         return sqlEngine;
     }
-    
+
+    public static RequestEngine getRequestEngine() {
+        return requestEngine;
+    }
+
 }

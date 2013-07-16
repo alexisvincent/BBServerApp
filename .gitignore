@@ -4,3 +4,4 @@
 /bundlers/
 /dist/
 .DS_Store
+/ServerDatabase/
