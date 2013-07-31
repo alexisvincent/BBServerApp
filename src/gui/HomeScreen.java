@@ -73,7 +73,7 @@ public class HomeScreen extends BPanel {
 
         gc.gridy = 2;
         gc.weighty = 0;
-        this.add(footer, gc);
+        //this.add(footer, gc);
 
         gc.gridx = 0;
         gc.gridy = 0;
