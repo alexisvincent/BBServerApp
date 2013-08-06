@@ -6,7 +6,7 @@ import gui.MainFrame;
 import gui.SplashScreen;
 import javax.swing.JFrame;
 import requestEngine.RequestEngine;
-import settingsEngine.SettingsEngine;
+import settingsEngine.ProfileEngine;
 import socketEngine.SimpleSocketEngine;
 import sqlEngine.SQLEngine;
 

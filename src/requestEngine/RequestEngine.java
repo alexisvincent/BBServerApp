@@ -70,15 +70,16 @@ public class RequestEngine {
             int counter = 1;
             for (Candidate candidate : candidates) {
                 Element candidateElement = new Element("Candidate" + counter++);
-                candidateElement.setAttribute("id", candidate.getId());
-                candidateElement.setAttribute("name", candidate.getName());
-                candidateElement.setAttribute("info", candidate.getInfo());
+                candidateElement.setAttribute("ID", candidate.getId());
+                candidateElement.setAttribute("Name", candidate.getName());
+                candidateElement.setAttribute("Info", candidate.getInfo());
                 responceElement.addContent(candidateElement);
             }
 
             responceElement.setAttribute("ResponceCode", "200");
             responceElement.setAttribute("ResponceDiscription", "OK");
             responceElement.setAttribute("CandidatesCount", candidates.size() + "");
+            
         } else if (request.getRequestType().equals("Vote") && request.getFrom().equals("VotingApp")) {
 
             String voterkey = rootElement.getAttributeValue("VoterKey");
@@ -99,6 +100,27 @@ public class RequestEngine {
                 responceElement.setAttribute("ResponceDiscription", "Failed");
             }
 
+        } else if (request.getRequestType().equals("Stats") && request.getFrom().equals("AdminApp")) {
+
+            ArrayList<Candidate> candidates = sqlEngine.getCandidateStats();
+
+            responceElement = new Element("Responce");
+
+            int counter = 1;
+            for (Candidate candidate : candidates) {
+                Element candidateElement = new Element("Candidate" + counter++);
+                candidateElement.setAttribute("ID", candidate.getId());
+                candidateElement.setAttribute("Name", candidate.getName());
+                candidateElement.setAttribute("Info", candidate.getInfo());
+                candidateElement.setAttribute("Tally", ""+candidate.getTally());
+                candidateElement.setAttribute("Percentage", ""+candidate.getPercentage());
+                responceElement.addContent(candidateElement);
+            }
+
+            responceElement.setAttribute("ResponceCode", "200");
+            responceElement.setAttribute("ResponceDiscription", "OK");
+            responceElement.setAttribute("CandidatesCount", candidates.size() + "");
+            
         }
 
         responce = new Responce(new Document(responceElement), request.getSocket());

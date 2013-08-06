@@ -55,7 +55,7 @@ public class SQLEngine {
                 } else {
                     status = "AlreadyVoted";
                 }
-                
+
             } else {
                 status = "IncorrectKey";
             }
@@ -77,6 +77,40 @@ public class SQLEngine {
             }
         } catch (SQLException ex) {
             Logger.getLogger(SQLEngine.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        return candidates;
+    }
+
+    public ArrayList<Candidate> getCandidateStats() {
+        ArrayList<Candidate> candidates = new ArrayList<>();
+
+        String sql = "SELECT id, name, info, image FROM tblCandidates";
+        ResultSet resultSet = executeQuery(sql);
+        
+        int tallyTotal = 0;
+
+        try {
+            while (resultSet.next()) {
+                Candidate candidate = new Candidate(resultSet.getString("id"), resultSet.getString("name"), resultSet.getString("info"), null);
+                candidates.add(candidate);
+
+                sql = "SELECT * FROM tblVotes WHERE candidateID='"+candidate.getId()+"'";
+                ResultSet rs = executeQuery(sql);
+                
+                int tally = 0;
+                while (rs.next()) {
+                    tally++;
+                }
+                tallyTotal += tally;
+                candidate.setTally(tally);
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(SQLEngine.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        for (Candidate candidate : candidates) {
+            candidate.setPercentage(candidate.getTally()/tallyTotal*100);
         }
 
         return candidates;
@@ -209,22 +243,22 @@ public class SQLEngine {
         candidate.setName("Alexis is the Best");
         candidate.setInfo("The name says it all");
         addCandidate(candidate);
-        
+
         candidate.setId("4");
         candidate.setName("Blah Blie Blue Bal");
         candidate.setInfo("The name says it all");
         addCandidate(candidate);
-        
+
         candidate.setId("5");
         candidate.setName("I want to go to the moon");
         candidate.setInfo("The name says it all");
         addCandidate(candidate);
-        
+
         candidate.setId("6");
         candidate.setName("Im bored");
         candidate.setInfo("The name says it all");
         addCandidate(candidate);
-        
+
         candidate.setId("7");
         candidate.setName("O.o");
         candidate.setInfo("The name says it all");
