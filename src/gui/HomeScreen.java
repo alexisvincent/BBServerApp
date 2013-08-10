@@ -18,6 +18,7 @@ import javax.swing.JComponent;
 import listeners.BStateListener;
 import toolkit.BSettings;
 import toolkit.BToolkit;
+import toolkit.UIToolkit;
 
 /**
  *
@@ -44,7 +45,7 @@ public class HomeScreen extends BPanel {
             @Override
             public void paint(Graphics g) {
                 Graphics2D g2d = (Graphics2D) g;
-                g2d.setComposite(BToolkit.makeComposite(50));
+                g2d.setComposite(UIToolkit.makeComposite(50));
                 g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
                 g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
@@ -146,7 +147,7 @@ public class HomeScreen extends BPanel {
         @Override
         protected void paintComponent(Graphics g) {
             Graphics2D g2d = (Graphics2D) g;
-            g2d.setComposite(BToolkit.makeComposite(panelOpacity));
+            g2d.setComposite(UIToolkit.makeComposite(panelOpacity));
         }
     }
 }

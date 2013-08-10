@@ -43,13 +43,13 @@ public class SQLEngine {
     public String vote(String voterID, String candidateID) {
         String status = "";
 
-        String sql = "SELECT votersID, candidateID FROM tblVotes WHERE votersID='" + voterID + "'";
+        String sql = "SELECT votersID, candidateID FROM tblVotes WHERE votersID='" + voterID.substring(0, 13) + "'";
 
         ResultSet resultSet = executeQuery(sql);
         try {
             if (resultSet.next()) {
                 if (resultSet.getString("candidateID") == null) {
-                    sql = "UPDATE tblVotes SET candidateID='" + candidateID + "' WHERE votersID='" + voterID + "'";
+                    sql = "UPDATE tblVotes SET candidateID='" + candidateID + "' WHERE votersID='" + voterID.substring(0, 13) + "'";
                     executeUpdate(sql);
                     status = "Successfull";
                 } else {
@@ -83,34 +83,34 @@ public class SQLEngine {
     }
 
     public ArrayList<Candidate> getCandidateStats() {
-        ArrayList<Candidate> candidates = new ArrayList<>();
+        ArrayList<Candidate> candidates = getCandidates();
 
-        String sql = "SELECT id, name, info, image FROM tblCandidates";
-        ResultSet resultSet = executeQuery(sql);
-        
-        int tallyTotal = 0;
+        double tallyTotal = 0;
+        for (Candidate candidate : candidates) {
+            String sql = "SELECT * FROM tblVotes WHERE candidateID='" + candidate.getId() + "'";
+            ResultSet rs = executeQuery(sql);
 
-        try {
-            while (resultSet.next()) {
-                Candidate candidate = new Candidate(resultSet.getString("id"), resultSet.getString("name"), resultSet.getString("info"), null);
-                candidates.add(candidate);
-
-                sql = "SELECT * FROM tblVotes WHERE candidateID='"+candidate.getId()+"'";
-                ResultSet rs = executeQuery(sql);
-                
-                int tally = 0;
+            int tally = 0;
+            try {
                 while (rs.next()) {
                     tally++;
                 }
                 tallyTotal += tally;
                 candidate.setTally(tally);
+            } catch (SQLException ex) {
+                Logger.getLogger(SQLEngine.class.getName()).log(Level.SEVERE, null, ex);
             }
-        } catch (SQLException ex) {
-            Logger.getLogger(SQLEngine.class.getName()).log(Level.SEVERE, null, ex);
+
         }
         
+        System.out.println(tallyTotal);
+
         for (Candidate candidate : candidates) {
-            candidate.setPercentage(candidate.getTally()/tallyTotal*100);
+            double percentage = 0;
+            if (tallyTotal != 0) {
+                percentage = candidate.getTally() / tallyTotal * 100;
+            }
+            candidate.setPercentage(percentage);
         }
 
         return candidates;
@@ -178,12 +178,12 @@ public class SQLEngine {
                 + " suburb VARCHAR(30), "
                 + " city VARCHAR(30), "
                 + " province VARCHAR(50), "
-                + " votersID VARCHAR(32), "
+                + " votersID VARCHAR(13), "
                 + " encryptionKey VARCHAR(32), "
                 + " PRIMARY KEY ( idNumber ))";
 
         String tblVotes = "CREATE TABLE tblVotes "
-                + "(votersID VARCHAR(32), "
+                + "(votersID VARCHAR(13), "
                 + " encryptionKey VARCHAR(32), "
                 + " candidateID VARCHAR(15), "
                 + " timestamp VARCHAR(15), "
@@ -191,7 +191,7 @@ public class SQLEngine {
                 + " PRIMARY KEY ( votersID ))";
 
         String tblCandidates = "CREATE TABLE tblCandidates "
-                + "(id VARCHAR(15), "
+                + "(id VARCHAR(5), "
                 + " name VARCHAR(30), "
                 + " info VARCHAR(120), "
                 + " image VARCHAR(255), "
@@ -224,48 +224,85 @@ public class SQLEngine {
         voter.setFirstName("Alexis");
         voter.setMiddleNames("John");
         voter.setSurname("Vincent");
-        voter.setIdNumber("1234567891234");
+        voter.setIdNumber("1111111111111");
         voter.setAddress(new Address("51 Kirkia Street", "", "Heldervue", "Somerset West", "Western Cape"));
         addVoter(voter);
 
+        voter.setFirstName("Ben");
+        voter.setIdNumber("2222222222222");
+        addVoter(voter);
+        
+        voter.setFirstName("John");
+        voter.setIdNumber("3333333333333");
+        addVoter(voter);
+        
+        voter.setFirstName("Peter");
+        voter.setIdNumber("4444444444444");
+        addVoter(voter);
+        
+        voter.setFirstName("Lucy");
+        voter.setIdNumber("5555555555555");
+        addVoter(voter);
+        
+        voter.setFirstName("Julien");
+        voter.setIdNumber("6666666666666");
+        addVoter(voter);
+
         Candidate candidate = new Candidate();
-        candidate.setId("1");
         candidate.setName("African National Congress");
         candidate.setInfo("Haha these guys suck");
         addCandidate(candidate);
 
-        candidate.setId("2");
         candidate.setName("Democratic Alliance");
         candidate.setInfo("These are slightly better");
         addCandidate(candidate);
 
-        candidate.setId("3");
         candidate.setName("Alexis is the Best");
         candidate.setInfo("The name says it all");
         addCandidate(candidate);
 
-        candidate.setId("4");
         candidate.setName("Blah Blie Blue Bal");
         candidate.setInfo("The name says it all");
         addCandidate(candidate);
 
-        candidate.setId("5");
         candidate.setName("I want to go to the moon");
         candidate.setInfo("The name says it all");
         addCandidate(candidate);
 
-        candidate.setId("6");
         candidate.setName("Im bored");
         candidate.setInfo("The name says it all");
         addCandidate(candidate);
 
-        candidate.setId("7");
         candidate.setName("O.o");
         candidate.setInfo("The name says it all");
+        addCandidate(candidate);
+
+        candidate.setName("sdfgsdfgsdfg");
+        candidate.setInfo("sdfgsdfg");
+        addCandidate(candidate);
+
+        candidate.setName("sfdgsdfg");
+        candidate.setInfo("sdfgsdfgsdfg");
         addCandidate(candidate);
     }
 
     public void addCandidate(Candidate candidate) {
+        
+        boolean unique = true;
+        while (unique) {
+            candidate.setId(generateKey(5));
+            
+            String sql = "SELECT id FROM tblCandidates WHERE id='"+candidate.getId()+"'";
+            ResultSet rs = executeQuery(sql);
+            try {
+                if(!rs.first()) {
+                    unique = false;
+                }
+            } catch (SQLException ex) {
+                Logger.getLogger(SQLEngine.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        
         String sql = "INSERT INTO tblCandidates VALUES('"
                 + candidate.getId() + "','"
                 + candidate.getName() + "','"
@@ -276,10 +313,24 @@ public class SQLEngine {
     }
 
     public void addVoter(Voter voter) {
-        if (voter.getVotersID().equals("")) {
-            voter.setVotersID("123456789");
-        } else if (voter.getEncryptionKey().equals("123456789")) {
+        
+        boolean unique = true;
+        while (unique) {
+            voter.setVotersID(generateKey(13));
+            
+            String sql = "SELECT votersID FROM tblVoterRegistry WHERE votersID='"+voter.getVotersID()+"'";
+            ResultSet rs = executeQuery(sql);
+            try {
+                if(!rs.first()) {
+                    unique = false;
+                }
+            } catch (SQLException ex) {
+                Logger.getLogger(SQLEngine.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
+        
+        voter.setEncryptionKey(generateKey(13));
+
         String sql = "INSERT INTO tblVoterRegistry VALUES('"
                 + voter.getIdNumber() + "','"
                 + voter.getFirstName() + "','"
@@ -300,6 +351,21 @@ public class SQLEngine {
 
         executeUpdate(sql);
 
+    }
+
+    private String generateKey(int size) {
+        String key = "";
+
+        for (int i = 0; i < size; i++) {
+            char character = '*';
+            while (!Character.isLetterOrDigit(character)) {
+                character = (char) ((Math.random() * 97) + 42);
+            }
+            key += character;
+        }
+
+        System.out.println(key);
+        return key;
     }
 
     private void connect(String databaseName, String username, String password) {
