@@ -39,6 +39,11 @@ public class SQLEngine {
             Logger.getLogger(SQLEngine.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
+    
+    public boolean removeCandidate(String candidateID) {
+        String sql = "DELETE FROM tblCandidates WHERE id='"+candidateID+"'";
+        return executeUpdate(sql);
+    }
 
     public String vote(String voterID, String candidateID) {
         String status = "";
@@ -69,11 +74,11 @@ public class SQLEngine {
     public ArrayList<Candidate> getCandidates() {
         ArrayList<Candidate> candidates = new ArrayList<>();
 
-        String sql = "SELECT id, name, info, image FROM tblCandidates";
+        String sql = "SELECT * FROM tblCandidates";
         ResultSet resultSet = executeQuery(sql);
         try {
             while (resultSet.next()) {
-                candidates.add(new Candidate(resultSet.getString("id"), resultSet.getString("name"), resultSet.getString("info"), null));
+                candidates.add(new Candidate(resultSet.getString("id"), resultSet.getString("name"), resultSet.getString("info"), resultSet.getString("image")));
             }
         } catch (SQLException ex) {
             Logger.getLogger(SQLEngine.class.getName()).log(Level.SEVERE, null, ex);
@@ -103,17 +108,47 @@ public class SQLEngine {
 
         }
         
-        System.out.println(tallyTotal);
-
         for (Candidate candidate : candidates) {
             double percentage = 0;
             if (tallyTotal != 0) {
-                percentage = candidate.getTally() / tallyTotal * 100;
+                percentage = Math.round(candidate.getTally() / tallyTotal * 10000)/100.0;
             }
             candidate.setPercentage(percentage);
         }
 
         return candidates;
+    }
+    
+    public ArrayList<Voter> getVoters() {
+        ArrayList<Voter> voters = new ArrayList<>();
+
+        String sql = "SELECT * FROM tblVoterRegistry";
+        ResultSet resultSet = executeQuery(sql);
+        try {
+            while (resultSet.next()) {
+                Voter voter = new Voter();
+                voter.setFirstName(resultSet.getString("firstName"));
+                voter.setMiddleNames(resultSet.getString("middleNames"));
+                voter.setSurname(resultSet.getString("lastName"));
+                voter.setIdNumber(resultSet.getString("idNumber"));
+                voter.setVotersID(resultSet.getString("votersID"));
+                voter.setEncryptionKey(resultSet.getString("encryptionKey"));
+                
+                Address address = new Address(
+                        resultSet.getString("addressLine1"), 
+                        resultSet.getString("addressLine2"), 
+                        resultSet.getString("suburb"), 
+                        resultSet.getString("city"), 
+                        resultSet.getString("province"));
+                voter.setAddress(address);
+                
+                voters.add(voter);
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(SQLEngine.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        return voters;
     }
 
     public String getVotersKey(String idNumber, String firstName) {
@@ -180,7 +215,7 @@ public class SQLEngine {
                 + " province VARCHAR(50), "
                 + " votersID VARCHAR(13), "
                 + " encryptionKey VARCHAR(32), "
-                + " PRIMARY KEY ( idNumber ))";
+                + " PRIMARY KEY ( votersID ))";
 
         String tblVotes = "CREATE TABLE tblVotes "
                 + "(votersID VARCHAR(13), "
@@ -247,43 +282,6 @@ public class SQLEngine {
         voter.setFirstName("Julien");
         voter.setIdNumber("6666666666666");
         addVoter(voter);
-
-        Candidate candidate = new Candidate();
-        candidate.setName("African National Congress");
-        candidate.setInfo("Haha these guys suck");
-        addCandidate(candidate);
-
-        candidate.setName("Democratic Alliance");
-        candidate.setInfo("These are slightly better");
-        addCandidate(candidate);
-
-        candidate.setName("Alexis is the Best");
-        candidate.setInfo("The name says it all");
-        addCandidate(candidate);
-
-        candidate.setName("Blah Blie Blue Bal");
-        candidate.setInfo("The name says it all");
-        addCandidate(candidate);
-
-        candidate.setName("I want to go to the moon");
-        candidate.setInfo("The name says it all");
-        addCandidate(candidate);
-
-        candidate.setName("Im bored");
-        candidate.setInfo("The name says it all");
-        addCandidate(candidate);
-
-        candidate.setName("O.o");
-        candidate.setInfo("The name says it all");
-        addCandidate(candidate);
-
-        candidate.setName("sdfgsdfgsdfg");
-        candidate.setInfo("sdfgsdfg");
-        addCandidate(candidate);
-
-        candidate.setName("sfdgsdfg");
-        candidate.setInfo("sdfgsdfgsdfg");
-        addCandidate(candidate);
     }
 
     public void addCandidate(Candidate candidate) {
@@ -307,8 +305,29 @@ public class SQLEngine {
                 + candidate.getId() + "','"
                 + candidate.getName() + "','"
                 + candidate.getInfo() + "','"
-                + "IMAGECODE')";
+                + candidate.getEncodedImage() + "')";
 
+        executeUpdate(sql);
+    }
+    
+    public void updateCandidate(Candidate candidate) {
+        String sql = "UPDATE tblCandidates SET name='"+candidate.getName()+"', info='"+candidate.getInfo()+"', image='"+candidate.getEncodedImage()+"' WHERE id='"+candidate.getId()+"'";
+        executeUpdate(sql);
+    }
+    
+    public void updateVoter(Voter voter) {
+        System.out.println(voter.getIdNumber());
+        String sql = "UPDATE tblVoterRegistry SET "
+                + "firstName='"+voter.getFirstName()+"', "
+                + "middleNames='"+voter.getMiddleNames()+"', "
+                + "lastName='"+voter.getSurname()+"', "
+                + "idNumber='"+voter.getIdNumber()+"', "
+                + "addressLine1='"+voter.getAddress().getAddressLine1()+"', "
+                + "addressLine2='"+voter.getAddress().getAddressLine2()+"', "
+                + "suburb='"+voter.getAddress().getSuburb()+"', "
+                + "city='"+voter.getAddress().getCity()+"', "
+                + "province='"+voter.getAddress().getProvince()+"' "
+                + "WHERE votersID='"+voter.getVotersID()+"'";
         executeUpdate(sql);
     }
 
@@ -351,6 +370,20 @@ public class SQLEngine {
 
         executeUpdate(sql);
 
+    }
+    
+    public boolean removeVoter(String voterID) {
+        
+        String sql = "DELETE FROM tblVoterRegistry WHERE votersID='"+voterID+"'";
+        executeUpdate(sql);
+        
+        sql = "DELETE FROM tblVotes WHERE votersID='"+voterID+"'";
+        return executeUpdate(sql);
+    }
+    
+    public boolean resetElection() {
+        String sql = "UPDATE tblVotes SET candidateID=''";
+        return executeUpdate(sql);
     }
 
     private String generateKey(int size) {

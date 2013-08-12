@@ -1,9 +1,12 @@
 package gui;
 
 import components.BFooter;
+import components.BLabel;
 import components.BMenuBar;
 import components.BPanel;
+import components.BPasswordField;
 import components.BSwitch;
+import components.BTextField;
 import components.BTextPane;
 import java.awt.Dimension;
 import java.awt.Graphics;
@@ -18,6 +21,7 @@ import javax.swing.JComponent;
 import listeners.BStateListener;
 import toolkit.BSettings;
 import toolkit.BToolkit;
+import toolkit.ResourceManager;
 import toolkit.UIToolkit;
 
 /**
@@ -85,6 +89,10 @@ public class HomeScreen extends BPanel {
         this.add(logoPane, gc);
 
     }
+    
+    public String getPassword() {
+        return BToolkit.getPass(homeScreenPanel.passwordField.getPassword());
+    }
 
     public HomeScreenPanel getHomeScreenPanel() {
         return homeScreenPanel;
@@ -97,6 +105,8 @@ public class HomeScreen extends BPanel {
         private BSwitch serverSwitch;
         private BTextPane log;
         private JComponent logoPane;
+        private BPasswordField passwordField;
+        private BLabel passwordLabel;
 
         public HomeScreenPanel() {
 
@@ -107,7 +117,7 @@ public class HomeScreen extends BPanel {
 
             //setup le variabili
             serverSwitch.setFont(BSettings.getFont("BSwitch", 12));
-            serverSwitch.setPreferredSize(new Dimension(100, 50));
+            serverSwitch.setPreferredSize(new Dimension(120, 70));
 
             serverSwitch.addStateListener(new BStateListener() {
 
@@ -120,6 +130,15 @@ public class HomeScreen extends BPanel {
                     }
                 }
             });
+            
+            passwordLabel = new BLabel("Server Password");
+            passwordLabel.setPreferredSize(new Dimension(200, 15));
+            passwordLabel.setFont(ResourceManager.getFont("Sax Mono").deriveFont(16f));
+            
+            passwordField = new BPasswordField();
+            passwordField.setPreferredSize(new Dimension(200, 30));
+            passwordField.setFont(ResourceManager.getFont("Sax Mono").deriveFont(16f));
+            
 
             //begin adding le variabili
             this.setLayout(new GridBagLayout());
@@ -127,7 +146,7 @@ public class HomeScreen extends BPanel {
             gc.gridx = 0;
             gc.gridy = 0;
             gc.gridwidth = 1;
-            gc.gridheight = 1;
+            gc.gridheight = 2;
             gc.weightx = 1;
             gc.weighty = 1;
             gc.ipadx = 0;
@@ -136,6 +155,16 @@ public class HomeScreen extends BPanel {
             gc.fill = GridBagConstraints.NONE;
             gc.anchor = GridBagConstraints.CENTER;
             this.add(serverSwitch, gc);
+            
+            gc.gridheight = 1;
+            gc.gridx++;
+            gc.insets = new Insets(5, 0, 5, 0);
+            gc.anchor = GridBagConstraints.SOUTHWEST;
+            this.add(passwordLabel, gc);
+            
+            gc.gridy++;
+            gc.anchor = GridBagConstraints.NORTHWEST;
+            this.add(passwordField, gc);
 
         }
 

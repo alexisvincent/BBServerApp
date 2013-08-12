@@ -23,6 +23,7 @@ public class SimpleSocketEngine implements Runnable {
     private int port;
     private Thread serverThread;
     private PacketBuilder requestBuilder;
+    private boolean online;
 
     public SimpleSocketEngine(int port) {
         this.port = port;
@@ -43,42 +44,52 @@ public class SimpleSocketEngine implements Runnable {
 
             @Override
             public void socketResponded(ASocket socket, String responce) {
-                System.out.println("Server: Socket @ "+socket.getSocket().getInetAddress().toString().substring(1)+" Responded");
+                System.out.println("Server: Socket @ " + socket.getSocket().getInetAddress().toString().substring(1) + " Responded");
             }
         });
-        
-        addSocketListener(new SocketAdapter() {
 
+        addSocketListener(new SocketAdapter() {
             @Override
             public void socketResponded(ASocket socket, String responce) {
                 Request request;
-                
+
                 if ((request = requestBuilder.addRequestPiece(responce, socket)) != null) {
                     main.Main.getRequestEngine().postRequest(request);
                 };
             }
-            
         });
     }
 
     public void start() {
         try {
+            online = true;
+            
+            serverSocket = null;
+            
             serverSocket = new ServerSocket(port);
             serverThread = new Thread(this);
             serverThread.start();
-            System.out.println("Socket Engine started on port: "+port+"\nListening for new connections");
+            System.out.println("Socket Engine started on port: " + port + "\nListening for new connections");
         } catch (IOException ex) {
             Logger.getLogger(SimpleSocketEngine.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
     public void stop() {
+        online = false;
+        
+        for(ASocket socket : sockets) {
+            socket.setActive(false);
+        }
+        
         try {
             serverSocket.close();
-            System.out.println("Socket Engine has been stopped");
         } catch (IOException ex) {
             Logger.getLogger(SimpleSocketEngine.class.getName()).log(Level.SEVERE, null, ex);
         }
+        
+        sockets.clear();
+        System.out.println("Socket Engine has been stopped");
     }
 
     public void addSocketListener(SocketListener listener) {
@@ -105,10 +116,10 @@ public class SimpleSocketEngine implements Runnable {
 
     @Override
     public void run() {
-        while (serverSocket != null && !serverSocket.isClosed()) {
+        while (serverSocket != null && online) {
             try {
                 final ASocket socket = new ASocket(serverSocket.accept());
-                if (!serverSocket.isClosed()) {
+                if (online) {
                     sockets.add(socket);
                     socket.addSocketListener(new SocketAdapter() {
                         @Override

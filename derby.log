@@ -1,7 +1,7 @@
 ----------------------------------------------------------------
-Sat Aug 10 11:19:50 SAST 2013:
-Booting Derby version The Apache Software Foundation - Apache Derby - 10.10.1.1 - (1458268): instance a816c00e-0140-6786-4ef9-0000039938c8 
-on database directory /Users/alexisvincent/Documents/Coding/Projects/BBSuite/BBServerApp/ServerDatabase with class loader sun.misc.Launcher$AppClassLoader@55187eb3 
+Mon Aug 12 03:09:02 SAST 2013:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.10.1.1 - (1458268): instance a816c00e-0140-7011-b158-0000037f6398 
+on database directory /Users/alexisvincent/Documents/Coding/Projects/BBSuite/BBServerApp/ServerDatabase with class loader sun.misc.Launcher$AppClassLoader@3b26456a 
 Loaded from file:/Users/alexisvincent/Documents/Coding/Projects/BBSuite/BBServerApp/lib/derby.jar
 java.vendor=Oracle Corporation
 java.runtime.version=1.7.0_12-ea-b08

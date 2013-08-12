@@ -22,6 +22,7 @@ public class Main {
     private static SimpleSocketEngine socketEngine;
     private static SQLEngine sqlEngine;
     private static RequestEngine requestEngine;
+    private static ProfileEngine profileEngine;
     
     private static Main INSTANCE;
 
@@ -34,9 +35,12 @@ public class Main {
         splash = new SplashScreen();
         splash.setVisible(true);
         
-        socketEngine = new SimpleSocketEngine(12345);
+        profileEngine = new ProfileEngine();
+        
+        socketEngine = new SimpleSocketEngine(profileEngine.getFirstProfile().getServer().getServerPort());
         sqlEngine = new SQLEngine();
         requestEngine = new RequestEngine(sqlEngine);
+        
 
         //init mainFrame
         mainFrame = new MainFrame();
@@ -46,7 +50,6 @@ public class Main {
         BMenuBar.setMainFrame(mainFrame);
         BFooter.setHomeScreen(mainFrame.getHomeScreen());
     }
-    
     
     public static void main(String[] args) {
         getINSTANCE();
